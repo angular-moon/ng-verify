@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "description": "angular表单验证",
+    "name": "ng-verify",
+    "main": "ng-verify.js",
+    "dependencies": [
+        "angular-messages"
+    ],
+    "shim": {
+        "ng-verify.js": {
+            "deps": ["angular-messages"],
+            "exports": "'verify'"
+        }
+    }
+}
