@@ -1,6 +1,6 @@
 ﻿var verify = angular.module("verify",["ngMessages"]);
 
-verify.run(function($rootScope){
+verify.run(["$rootScope", function($rootScope){
 
     $rootScope._PATTERN_ = {};
     $rootScope._PATTERN_.currency = /^(-)?(([1-9]{1}\d*)|([0]{1}))(\.(\d){1,2})?$/; //金额,2位小数
@@ -34,7 +34,7 @@ verify.run(function($rootScope){
     $rootScope._PATTERN_.letter_u = /^[A-Z]+$/;                    //大写字母
     $rootScope._PATTERN_.letter_l = /^[a-z]+$/;                    //小写字母
     $rootScope._PATTERN_.idcard = /^[1-9]([0-9]{14}|[0-9]{17})$/;   //身份证
-});
+}]);
 
 
 verify.directive('ngMin', function() {
@@ -164,7 +164,7 @@ verify.directive("dyName", [
 ]);
 
 //<form show-one> 同一时刻只显示一个ngMessages
-verify.directive("showOne", function($window, $timeout){
+verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
      return {
         restrict: 'A',
         controller: ['$scope', function($scope){
@@ -250,10 +250,10 @@ verify.directive("showOne", function($window, $timeout){
 
         }]
     };
-});
+}]);
 
 //自动计算ngMessages 的 position
-verify.directive("ngMessages",function($window, $timeout){
+verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
      return {
         restrict: 'EA',
         require: '?^showOne',
@@ -301,7 +301,7 @@ verify.directive("ngMessages",function($window, $timeout){
             }
         }
     };
-});
+}]);
 
 $(function(){
     if(top.$.blockUI && $(".error-messages").size()>0){
