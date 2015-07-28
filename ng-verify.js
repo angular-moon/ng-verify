@@ -304,13 +304,15 @@ verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
 }]);
 
 $(function(){
-    if(top.$.blockUI && $(".error-messages").size()>0){
-        var old = function(){};
-        if(top.$.blockUI.defaults.onBlock)
-            old = top.$.blockUI.defaults.onBlock;
+    if(top.$.blockUI
+        && top.$.blockUI.defaults.onBlock
+        && !top.$.blockUI.defaults.__oldOnBlock 
+        && $(".error-messages").size()>0){
+
+        top.$.blockUI.defaults.__oldOnBlock = top.$.blockUI.defaults.onBlock;
         
         top.$.blockUI.defaults.onBlock = function(){
-            old();
+            top.$.blockUI.defaults.__oldOnBlock();
             try{
                 $(window.top).resize();
             }catch(e){
