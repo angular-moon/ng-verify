@@ -304,22 +304,24 @@ verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
 }]);
 
 $(function(){
-    if(top.$.blockUI
-        && top.$.blockUI.defaults.onBlock
-        && !top.$.blockUI.defaults.__oldOnBlock 
-        && $(".error-messages").size()>0){
-
-        top.$.blockUI.defaults.__oldOnBlock = top.$.blockUI.defaults.onBlock;
-        
-        top.$.blockUI.defaults.onBlock = function(){
-            top.$.blockUI.defaults.__oldOnBlock();
+    if(top.$.blockUI){
+    
+        var onBlock = function(){
             try{
                 $(window.top).resize();
             }catch(e){
-                 $(window).resize();
+                $(window).resize();
             }
+        }
+       
+       if(top.$.blockUI.defaults.onBlock && top.$.blockUI.defaults.onBlock.toString() != onBlock.toString()){
+            var oldOnBlock = top.$.blockUI.defaults.onBlock;
+            top.$.blockUI.defaults.onBlock = function(){oldOnBlock();onBlock();}
+        }else{
+             top.$.blockUI.defaults.onBlock = onBlock;
         }
     }
 });
+
 
 window.angular.element(top.document).add(document).find('head').prepend("<style>form{position:relative}.error-messages.ng-active{background:#b62929;color:#FFF;padding:5px;border-radius:5px;position:absolute;z-index:900}.error-messages.ng-active:after{position:absolute;top:-10px;content:'';left:20px;border-style:solid;border-color:transparent transparent #b62929;border-width:5px}.error-messages.ng-active{*zoom:expression(this.runtimeStyle['zoom'] = '1',this.insertBefore(document.createElement('s')))}.error-messages.ng-active s{position:absolute;top:-30px;left:20px;border-style:solid;border-color:transparent transparent #b62929;border-width:5px}.error-messages.ng-active{color:#FFF;line-height:20px}</style>");
