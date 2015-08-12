@@ -354,7 +354,7 @@ var style="<style>" +
     ".error-messages.ng-active s{" +
     "position:absolute;" +
     "width:0;height:0;line-height:0;"+
-    "top:-30px;" +
+    "top:-10px;" +
     "left:20px;" +
     "border-style:solid;" +
     "border-color:transparent transparent #b62929;" +
@@ -366,4 +366,6 @@ var style="<style>" +
     ".error-messages.ng-active{color:#FFF;line-height:20px}" +
     "</style>"
 
-window.angular.element(top.document).add(document).find('head').prepend(style);
+window.angular.element(document).find('head').prepend(style);
+if(top != self)
+  window.angular.element('head', top.document).prepend(style);
