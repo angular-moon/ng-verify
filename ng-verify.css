@@ -1,0 +1,52 @@
+﻿.error-messages.ng-active {
+    box-sizing: content-box;
+    display: block;
+    line-height: 20px;
+    background: #b62929;
+    color: #FFF;
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 900
+}
+
+.error-messages.ng-active:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    line-height: 0;
+    top: -10px;
+    left: 20px;
+    border-style: solid;
+    border-color: transparent transparent #b62929 transparent;
+    border-width: 5px;
+}
+
+.error-messages.ng-active.right:after {
+    top: 10px;
+    left: -10px;
+    border-color: transparent #b62929 transparent transparent;
+}
+
+.error-messages.ng-active {
+    *zoom: expression(this.runtimeStyle['zoom'] = '1',this.insertBefore(document.createElement('s')));
+}
+
+.error-messages.ng-active s {
+    position: absolute;
+    width: 0;
+    height: 0;
+    line-height: 0;
+    top: -10px;
+    left: 20px;
+    border-style: solid;
+    border-color: transparent transparent #b62929;
+    border-width: 5px;
+}
+
+.error-messages.ng-active.right s {
+    top: 10px;
+    left: -10px;
+    border-color: transparent #b62929 transparent transparent;
+}

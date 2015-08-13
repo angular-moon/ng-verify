@@ -218,7 +218,7 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
             function show(index){
                  for(var i=meaasges.length-1;i>=0;--i){
                     if(index == i)
-                        meaasges[i].css('display','table');
+                        meaasges[i].css('display','block');
                     else   
                         meaasges[i].css('display','none');
                  }
@@ -324,48 +324,3 @@ $(function(){
         }
     }
 });
-
-var style="<style>" +
-    "form{position:relative}" +
-    ".error-messages.ng-active{" +
-    "box-sizing: content-box;" +
-    "display:table;" +
-    "line-height:20px;" +
-    "background:#b62929;" +
-    "color:#FFF;" +
-    "padding:5px;" +
-    "border-radius:5px;" +
-    "position:absolute;z-index:900}" +
-    ".error-messages.ng-active:after{" +
-    "position:absolute;" +
-    "width:0;height:0;line-height:0;"+
-    "top:-10px;" +
-    "content:'';" +
-    "left:20px;" +
-    "border-style:solid;" +
-    "border-color:transparent transparent #b62929;" +
-    "border-width:5px}" +
-    ".error-messages.ng-active.right:after{" +
-    "top:10px;" +
-    "left:-10px;" +
-    "border-color:transparent #b62929 transparent transparent;}" +
-    ".error-messages.ng-active{" +
-    "*zoom:expression(this.runtimeStyle['zoom'] = '1',this.insertBefore(document.createElement('s')))}" +
-    ".error-messages.ng-active s{" +
-    "position:absolute;" +
-    "width:0;height:0;line-height:0;"+
-    "top:-10px;" +
-    "left:20px;" +
-    "border-style:solid;" +
-    "border-color:transparent transparent #b62929;" +
-    "border-width:5px}" +
-    ".error-messages.ng-active.right s{" +
-    "top:10px;" +
-    "left:-10px;" +
-    "border-color:transparent #b62929 transparent transparent;}" +
-    ".error-messages.ng-active{color:#FFF;line-height:20px}" +
-    "</style>"
-
-window.angular.element(document).find('head').prepend(style);
-if(top != self)
-  window.angular.element('head', top.document).prepend(style);

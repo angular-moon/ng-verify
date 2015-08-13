@@ -4,11 +4,12 @@
     "name": "ng-verify",
     "main": "ng-verify.js",
     "dependencies": [
-        "angular-messages"
+        "angular-messages",
+        "css"
     ],
     "shim": {
         "ng-verify.js": {
-            "deps": ["angular-messages"],
+            "deps": ["angular-messages","css!ng-verify.css"],
             "exports": "'verify'"
         }
     }
