@@ -42,8 +42,9 @@ verify.directive('ngMin', function() {
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
-            scope.$watch(attr.ngMin, function(){
-                ctrl.$setViewValue(ctrl.$viewValue);
+            scope.$watch(attr.ngMin, function(newValue, oldValue){
+            	if(newValue !== oldValue)
+                	ctrl.$setViewValue(ctrl.$viewValue);
             });
             var minValidator = function(value) {
               var min = scope.$eval(attr.ngMin) || 0;
@@ -66,8 +67,9 @@ verify.directive('ngMax', function() {
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
-            scope.$watch(attr.ngMax, function(){
-                ctrl.$setViewValue(ctrl.$viewValue);
+            scope.$watch(attr.ngMax, function(newValue, oldValue){
+            	if(newValue !== oldValue)
+                	ctrl.$setViewValue(ctrl.$viewValue);
             });
             var maxValidator = function(value) {
               var max = scope.$eval(attr.ngMax) || Infinity;
@@ -90,8 +92,9 @@ verify.directive('maxTime', function() {
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
-            scope.$watch(attr.maxTime, function(){
-                ctrl.$setViewValue(ctrl.$viewValue);
+            scope.$watch(attr.maxTime, function(newValue, oldValue){
+            	if(newValue !== oldValue)
+                	ctrl.$setViewValue(ctrl.$viewValue);
             });
             var maxTimeValidator = function(value) {
               var maxTime,time;
@@ -117,8 +120,9 @@ verify.directive('minTime', function() {
         restrict: 'A',
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
-            scope.$watch(attr.minTime, function(){
-                ctrl.$setViewValue(ctrl.$viewValue);
+            scope.$watch(attr.minTime, function(newValue, oldValue){
+            	if(newValue !== oldValue)
+                	ctrl.$setViewValue(ctrl.$viewValue);
             });
             var minTimeValidator = function(value) {
               var minTime,time;
