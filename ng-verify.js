@@ -1,6 +1,6 @@
 ﻿var verify = angular.module("verify",["ngMessages"]);
 
-verify.run(["$rootScope", function($rootScope){
+verify.run(function($rootScope){
 
     $rootScope._PATTERN_ = {};
     $rootScope._PATTERN_.currency = /^(-)?(([1-9]{1}\d*)|([0]{1}))(\.(\d){1,2})?$/; //金额,2位小数
@@ -34,7 +34,7 @@ verify.run(["$rootScope", function($rootScope){
     $rootScope._PATTERN_.letter_u = /^[A-Z]+$/;                    //大写字母
     $rootScope._PATTERN_.letter_l = /^[a-z]+$/;                    //小写字母
     $rootScope._PATTERN_.idcard = /^[1-9]([0-9]{14}|[0-9]{17})$/;   //身份证
-}]);
+});
 
 
 verify.directive('ngMin', function() {
@@ -43,21 +43,29 @@ verify.directive('ngMin', function() {
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
             scope.$watch(attr.ngMin, function(newValue, oldValue){
-            	if(newValue !== oldValue)
-                	ctrl.$setViewValue(ctrl.$viewValue);
+                if(newValue !== oldValue)
+                    ctrl.$setViewValue(ctrl.$viewValue);
             });
             var minValidator = function(value) {
-              var min = scope.$eval(attr.ngMin) || 0;
-              if (value*1 < min*1) {
-                ctrl.$setValidity('min', false);
-              } else {
-                ctrl.$setValidity('min', true);
-              }
-              return value;
+
+                //如果值为'空',设置验证通过,
+                //对于空值的验证应该使用required
+                if(ctrl.$isEmpty(value)){
+                    ctrl.$setValidity('min', true);
+                    return;
+                }
+
+                var min = scope.$eval(attr.ngMin) || 0;
+                if (value*1 < min*1) {
+                    ctrl.$setValidity('min', false);
+                } else {
+                    ctrl.$setValidity('min', true);
+                }
+                return value;
             };
 
-            ctrl.$parsers.push(minValidator);
             ctrl.$formatters.push(minValidator);
+            ctrl.$parsers.unshift(minValidator);
         }
     };
 });
@@ -68,21 +76,29 @@ verify.directive('ngMax', function() {
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
             scope.$watch(attr.ngMax, function(newValue, oldValue){
-            	if(newValue !== oldValue)
-                	ctrl.$setViewValue(ctrl.$viewValue);
+                if(newValue !== oldValue)
+                    ctrl.$setViewValue(ctrl.$viewValue);
             });
             var maxValidator = function(value) {
-              var max = scope.$eval(attr.ngMax) || Infinity;
-              if (value*1 > max*1) {
-                ctrl.$setValidity('max', false);
-              } else {
-                ctrl.$setValidity('max', true);
-              }
-              return value;
+
+                //如果值为'空',设置验证通过,
+                //对于空值的验证应该使用required
+                if(ctrl.$isEmpty(value)){
+                    ctrl.$setValidity('max', true);
+                    return;
+                }
+
+                var max = scope.$eval(attr.ngMax) || Infinity;
+                if (value*1 > max*1) {
+                    ctrl.$setValidity('max', false);
+                } else {
+                    ctrl.$setValidity('max', true);
+                }
+                return value;
             };
             
-            ctrl.$parsers.push(maxValidator);
             ctrl.$formatters.push(maxValidator);
+            ctrl.$parsers.unshift(maxValidator);
         }
     };
 });
@@ -93,24 +109,40 @@ verify.directive('maxTime', function() {
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
             scope.$watch(attr.maxTime, function(newValue, oldValue){
-            	if(newValue !== oldValue)
-                	ctrl.$setViewValue(ctrl.$viewValue);
+                if(newValue !== oldValue)
+                    ctrl.$setViewValue(ctrl.$viewValue);
             });
             var maxTimeValidator = function(value) {
-              var maxTime,time;
-              maxTime = scope.$eval(attr.maxTime);
-              maxTime = maxTime ? Date.parse(maxTime.replace(/-/g, '/') || "1970/01/01") : 0;
-              time = value ? Date.parse(value.replace(/-/g, '/')) : 0;
-              if (time >= maxTime) {
-                ctrl.$setValidity('maxTime', false);
-              } else {
-                ctrl.$setValidity('maxTime', true);
-              }
-              return value;
+
+                //如果值为'空',设置验证通过,
+                //对于空值的验证应该使用required
+                if(ctrl.$isEmpty(value)){
+                    ctrl.$setValidity('maxTime', true);
+                    return;
+                }
+
+                var maxTime,time;
+                try{
+                    maxTime = scope.$eval(attr.maxTime);
+                    if(angular.isString(maxTime))
+                        maxTime = Date.parse(maxTime.replace(/-/g, '/'));
+                    else if(angular.isDate(maxTime))
+                        maxTime = maxTime.getTime();
+                }catch(e){
+                    maxTime = 0;
+                }
+                
+                time = value ? Date.parse(value.replace(/-/g, '/')) : 0;
+                if (time > maxTime) {
+                    ctrl.$setValidity('maxTime', false);
+                } else {
+                    ctrl.$setValidity('maxTime', true);
+                }
+                return value;
             };
             
-            ctrl.$parsers.push(maxTimeValidator);
             ctrl.$formatters.push(maxTimeValidator);
+            ctrl.$parsers.unshift(maxTimeValidator);
         }
     };
 });
@@ -121,24 +153,40 @@ verify.directive('minTime', function() {
         require: 'ngModel',
         link: function(scope, elem, attr, ctrl) {
             scope.$watch(attr.minTime, function(newValue, oldValue){
-            	if(newValue !== oldValue)
-                	ctrl.$setViewValue(ctrl.$viewValue);
+                if(newValue !== oldValue)
+                    ctrl.$setViewValue(ctrl.$viewValue);
             });
             var minTimeValidator = function(value) {
-              var minTime,time;
-              minTime = scope.$eval(attr.minTime);
-              minTime = minTime ? Date.parse(minTime.replace(/-/g, '/') || "1970/01/01") : 0;
-              time = value ? Date.parse(value.replace(/-/g, '/')) : 0;
-              if (time < minTime) {
-                ctrl.$setValidity('minTime', false);
-              } else {
-                ctrl.$setValidity('minTime', true);
-              }
-              return value;
+
+                //如果值为'空',设置验证通过,
+                //对于空值的验证应该使用required
+                if(ctrl.$isEmpty(value)){
+                    ctrl.$setValidity('minTime', true);
+                    return;
+                }
+                
+                var minTime,time;
+                try{
+                    minTime = scope.$eval(attr.minTime);
+                    if(angular.isString(minTime))
+                        minTime = Date.parse(minTime.replace(/-/g, '/'));
+                    else if(angular.isDate(minTime))
+                        minTime = minTime.getTime();
+                 }catch(e){
+                    minTime = 0;
+                }
+               
+                time = value ? Date.parse(value.replace(/-/g, '/')) : 0;
+                if (time < minTime) {
+                    ctrl.$setValidity('minTime', false);
+                } else {
+                    ctrl.$setValidity('minTime', true);
+                }
+                return value;
             };
             
-            ctrl.$parsers.push(minTimeValidator);
             ctrl.$formatters.push(minTimeValidator);
+            ctrl.$parsers.unshift(minTimeValidator);
         }
     };
 });
@@ -168,7 +216,7 @@ verify.directive("dyName", [
 ]);
 
 //<form show-one> 同一时刻只显示一个ngMessages
-verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
+verify.directive("showOne", function($window, $timeout){
      return {
         restrict: 'A',
         controller: ['$scope', function($scope){
@@ -183,6 +231,22 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
                     return -1;
                 }
             }
+
+            var adjust = null;
+            function adjustPosition(){
+                $timeout.cancel(adjust);
+                adjust = $timeout(function(){
+                    try{
+                        $($window.top).resize();
+                    }catch(e){
+                        $($window).resize();
+                    }
+                },40);
+            }
+
+            $scope.$on("verfiyAdjust", function(){
+                adjustPosition();
+            })
             
             this.addMessage = function(elem){
 
@@ -199,17 +263,9 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
                         break;
                     }
                 }
-               
+                adjustPosition();
                 meaasges.splice(insertTo|0, 0 , elem);
-                var adjust = null;
-                $timeout.cancel(adjust);
-                adjust = $timeout(function(){
-                    try{
-                        $($window.top).resize();
-                    }catch(e){
-                        $($window).resize();
-                    }
-                },20);
+               
                 
             };
 
@@ -218,6 +274,7 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
             }
 
             var showIndex = 0;
+
 
             function show(index){
                  for(var i=meaasges.length-1;i>=0;--i){
@@ -236,7 +293,6 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
                 }
             };
 
-
             this.showIndexNext = function(elem){
                 var index = meaasges.indexOf(elem);
                 if(index == showIndex){
@@ -254,15 +310,17 @@ verify.directive("showOne", ["$window","$timeout", function($window, $timeout){
 
         }]
     };
-}]);
+});
 
 //自动计算ngMessages 的 position
-verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
+verify.directive("ngMessages",function($window, $timeout){
      return {
         restrict: 'EA',
         require: '?^showOne',
         link: function(scope, elem, attr, showOne) {
             var position = attr["position"];
+            if(position == "right")
+                elem.addClass("right");
 
             function adjust(){
                 var input = elem.prevAll("input,textarea,select").first();
@@ -272,7 +330,6 @@ verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
                                'top':input.position().top + input.outerHeight() + 10 +'px'});
                     }else{
                         if(position == "right"){
-                            elem.addClass("right");
                             elem.css({
                                 'left': input.position().left + input.outerWidth() + 10 + 'px',
                                 'top': input.position().top  + 'px'
@@ -315,7 +372,44 @@ verify.directive("ngMessages",["$window","$timeout",function($window, $timeout){
             }
         }
     };
-}]);
+});
+
+verify.directive("noVerify",function(){
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        priority: -1000,
+        link: function(scope, elem, attr, ngModel) {
+            if(!ngModel){
+                if(console)
+                    console.error("noVerify can't find ngModel");
+                return;
+            }
+            
+            if(attr.noVerify){
+                scope.$watch(attr.noVerify, function(newValue, oldValue){
+                    if(newValue !== oldValue)
+                    ngModel.$setViewValue(ngModel.$viewValue);
+                })
+            }
+
+            var noVerify = function(value){
+                if((attr.noVerify === "" || scope.$eval(attr.noVerify)) && ngModel.$error){
+                     for (var key in ngModel.$error) {
+                        if (ngModel.$error.hasOwnProperty(key)) {
+                            ngModel.$setValidity(key, true);
+                        }
+                    }
+                }
+                return value;
+            }
+
+            ngModel.$formatters.push(noVerify);
+            ngModel.$parsers.push(noVerify);
+           
+        }
+    };
+});
 
 $(function(){
     if(top.$.blockUI){
