@@ -244,10 +244,6 @@ verify.directive("showOne", function($window, $timeout){
                 },40);
             }
 
-            $scope.$on("verfiyAdjust", function(){
-                adjustPosition();
-            })
-            
             this.addMessage = function(elem){
 
                 //初始化为隐藏
@@ -355,6 +351,12 @@ verify.directive("ngMessages",function($window, $timeout){
                     adjust();
                 });
             }
+
+            scope.$on("verfiyAdjust", function(){
+                $timeout(function(){
+                    adjust();
+                });
+            })
             
             if(showOne){
                 showOne.addMessage(elem);
@@ -415,10 +417,17 @@ $(function(){
     if(top.$.blockUI){
         top.$.blockUI.defaults.onBlock = function(){
             try{
-                $(window.top).resize();
+                angular.element(".blockMsg").injector().invoke(function($rootScope){
+                    $rootScope.$broadcast("verfiyAdjust");
+                });
             }catch(e){
-                $(window).resize();
+                try{
+                    $(window.top).resize();
+                }catch(e){
+                    $(window).resize();
+                }
             }
+            
         }
     }
 });
