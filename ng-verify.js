@@ -1,6 +1,6 @@
-﻿var verify = angular.module("verify",["ngMessages"]);
+var verify = angular.module("verify", ["ngMessages"]);
 
-verify.run(function($rootScope){
+verify.run(["$rootScope", function($rootScope){
 
     $rootScope._PATTERN_ = {};
     $rootScope._PATTERN_.currency = /^(-)?(([1-9]{1}\d*)|([0]{1}))(\.(\d){1,2})?$/; //金额,2位小数
@@ -34,7 +34,7 @@ verify.run(function($rootScope){
     $rootScope._PATTERN_.letter_u = /^[A-Z]+$/;                    //大写字母
     $rootScope._PATTERN_.letter_l = /^[a-z]+$/;                    //小写字母
     $rootScope._PATTERN_.idcard = /^[1-9]([0-9]{14}|[0-9]{17})$/;   //身份证
-});
+}]);
 
 
 verify.directive('ngMin', function() {
@@ -196,8 +196,7 @@ verify.directive('minTime', function() {
 //ngModel的$name属性并不支持表达式计算。
 //dy-name的解决此问题，其会在post link阶段解析表达式，并把自己注册到父form controller。
 //详见: http://www.ngnice.com/posts/81c1eb92bfbde0
-verify.directive("dyName", [
-    function() {
+verify.directive("dyName", function() {
         return {
             require: "ngModel",
             link: function(scope, elm, iAttrs, ngModelCtr) {
@@ -206,6 +205,10 @@ verify.directive("dyName", [
                     $addControl: angular.noop
                 };
                 formController.$addControl(ngModelCtr);
+                //fix noVerify bug
+                scope.$evalAsync(function(){
+                    ngModelCtr.$setViewValue(ngModelCtr.$viewValue);
+                })
 
                 scope.$on('$destroy', function() {
                     formController.$removeControl(ngModelCtr);
@@ -213,10 +216,10 @@ verify.directive("dyName", [
             }
         };
     }
-]);
+);
 
 //<form show-one> 同一时刻只显示一个ngMessages
-verify.directive("showOne", function($window, $timeout){
+verify.directive("showOne", ["$window", "$timeout", "$rootScope", function($window, $timeout, $rootScope){
      return {
         restrict: 'A',
         controller: ['$scope', function($scope){
@@ -237,9 +240,13 @@ verify.directive("showOne", function($window, $timeout){
                 $timeout.cancel(adjust);
                 adjust = $timeout(function(){
                     try{
-                        $($window.top).resize();
+                        $rootScope.$broadcast("verfiyAdjust");
                     }catch(e){
-                        $($window).resize();
+                        try{
+                            $(window.top).resize();
+                        }catch(e){
+                            $(window).resize();
+                        }
                     }
                 },40);
             }
@@ -275,7 +282,7 @@ verify.directive("showOne", function($window, $timeout){
             function show(index){
                  for(var i=meaasges.length-1;i>=0;--i){
                     if(index == i)
-                        meaasges[i].css('display','block');
+                        meaasges[i].fadeIn(250);
                     else   
                         meaasges[i].css('display','none');
                  }
@@ -306,10 +313,10 @@ verify.directive("showOne", function($window, $timeout){
 
         }]
     };
-});
+}]);
 
 //自动计算ngMessages 的 position
-verify.directive("ngMessages",function($window, $timeout){
+verify.directive("ngMessages", ["$window", "$timeout", function($window, $timeout){
      return {
         restrict: 'EA',
         require: '?^showOne',
@@ -356,6 +363,7 @@ verify.directive("ngMessages",function($window, $timeout){
                 $timeout(function(){
                     adjust();
                 });
+            
             })
             
             if(showOne){
@@ -374,9 +382,9 @@ verify.directive("ngMessages",function($window, $timeout){
             }
         }
     };
-});
+}]);
 
-verify.directive("noVerify",function(){
+verify.directive("noVerify", function(){
     return {
         restrict: 'A',
         require: 'ngModel',
@@ -406,7 +414,7 @@ verify.directive("noVerify",function(){
                 return value;
             }
 
-            ngModel.$formatters.push(noVerify);
+            ngModel.$formatters.unshift(noVerify);
             ngModel.$parsers.push(noVerify);
            
         }
@@ -417,9 +425,9 @@ $(function(){
     if(top.$.blockUI){
         top.$.blockUI.defaults.onBlock = function(){
             try{
-                angular.element(".blockMsg").injector().invoke(function($rootScope){
+                angular.element(".blockMsg").injector().invoke(["$rootScope", function($rootScope){
                     $rootScope.$broadcast("verfiyAdjust");
-                });
+                }]);
             }catch(e){
                 try{
                     $(window.top).resize();
@@ -427,7 +435,6 @@ $(function(){
                     $(window).resize();
                 }
             }
-            
         }
     }
 });
