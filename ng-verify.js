@@ -298,7 +298,7 @@ verify.directive("showOne", ["$window", "$timeout", "$rootScope", function($wind
 
             this.showIndexNext = function(elem){
                 var index = meaasges.indexOf(elem);
-                if(index == showIndex){
+                if(index <= showIndex){
                     showIndex = Math.min(index + 1, meaasges.length-1);
                     var length = meaasges.length;
                     while(showIndex < length){
