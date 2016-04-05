@@ -273,7 +273,8 @@ verify.directive("showOne", ["$window", "$timeout", "$rootScope", function($wind
             };
 
             this.delMessage = function(elem){
-                 meaasges.splice(meaasges.indexOf(elem), 1);
+                meaasges.splice(meaasges.indexOf(elem), 1);
+                this.showIndexNext(elem);
             }
 
             var showIndex = 0;
