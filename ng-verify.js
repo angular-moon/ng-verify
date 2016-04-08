@@ -330,7 +330,7 @@ verify.directive("ngMessages", ["$window", "$timeout", function($window, $timeou
                 elem.addClass("right");
 
             //设置位置偏移量
-            var _offset, offset = {};
+            var _offset, offset = {top:0, left:0};
             if(attr["offset"]){
                 _offset = attr["offset"].split(",");
                 offset.top = parseInt(_offset[0]) || 0;
