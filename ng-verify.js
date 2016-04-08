@@ -329,21 +329,35 @@ verify.directive("ngMessages", ["$window", "$timeout", function($window, $timeou
             if(position == "right")
                 elem.addClass("right");
 
+            //设置位置偏移量
+            var _offset, offset = {};
+            if(attr["offset"]){
+                _offset = attr["offset"].split(",");
+                offset.top = parseInt(_offset[0]) || 0;
+                offset.left = parseInt(_offset[1]) || 0;
+            }
+
+            //设定宽度
+            var width = parseInt(attr["width"]) || "auto";
+
             function adjust(){
                 var input = elem.prevAll("input,textarea,select").first();
                 if(input.length > 0){
                     if(input.attr("type") == "radio" || input.attr("type") == "checkbox" ){
-                        elem.css({'left':input.position().left - 39 +'px',
-                               'top':input.position().top + input.outerHeight() + 10 +'px'});
+                        elem.css({'left':input.position().left - 39 + offset.left +'px',
+                                'top':input.position().top + input.outerHeight() + 10 + offset.top +'px',
+                                'width':width});
                     }else{
                         if(position == "right"){
                             elem.css({
-                                'left': input.position().left + input.outerWidth() + 10 + 'px',
-                                'top': input.position().top  + 'px'
-                            });
+                                'left': input.position().left + input.outerWidth() + 10 + offset.left + 'px',
+                                'top': input.position().top + offset.top + 'px',
+                                'width':width});
+
                         }else{
-                            elem.css({'left':input.position().left+'px',
-                               'top':input.position().top + input.outerHeight() + 5 +'px'});
+                            elem.css({'left':input.position().left + offset.left +'px',
+                               'top':input.position().top + input.outerHeight() + 5 + offset.top +'px',
+                               'width':width});
                         }
                     }
                 }
