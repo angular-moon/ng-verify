@@ -34,7 +34,7 @@ verify.run(["$rootScope", function($rootScope){
     $rootScope._PATTERN_.letter = /^[A-Za-z]+$/;                   //字母
     $rootScope._PATTERN_.letter_u = /^[A-Z]+$/;                    //大写字母
     $rootScope._PATTERN_.letter_l = /^[a-z]+$/;                    //小写字母
-    $rootScope._PATTERN_.idcard = /^[1-9]([0-9]{14}|[0-9]{17})$/;   //身份证
+    $rootScope._PATTERN_.idcard = /^[1-9]([0-9]{14}|[0-9xX]{17})$/;   //身份证
 }]);
 
 
