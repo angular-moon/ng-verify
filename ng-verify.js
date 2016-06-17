@@ -4,7 +4,7 @@ verify.run(["$rootScope", function($rootScope){
 
     $rootScope._PATTERN_ = {};
     $rootScope._PATTERN_.currency = /^(-)?(([1-9]{1}\d*)|([0]{1}))(\.(\d){1,2})?$/; //金额,2位小数
-    $rootScope._PATTERN_.currency1 = /^[0-9]+(\.[0-9]{2})?$/; //非负金额,2位小数
+    $rootScope._PATTERN_.currency1 = /^(([1-9]{1}\d*)|([0]{1}))(\.(\d){1,2})?$/; //非负金额,2位小数
     $rootScope._PATTERN_.intege = /^([+-]?)\d*$/;                    //整数
     $rootScope._PATTERN_.intege1 = /^[1-9]\d*$/;                 //正整数
     $rootScope._PATTERN_.intege2 = /^-[1-9]\d*$/;                 //负整数
