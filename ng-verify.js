@@ -89,7 +89,10 @@ verify.directive('ngMax', function() {
                     return;
                 }
 
-                var max = scope.$eval(attr.ngMax) || Infinity;
+                var max = scope.$eval(attr.ngMax);
+                
+                max = max || (max === 0 ? 0 : Infinity);
+
                 if (value*1 > max*1) {
                     ctrl.$setValidity('max', false);
                 } else {
