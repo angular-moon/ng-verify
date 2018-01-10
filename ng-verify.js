@@ -298,7 +298,7 @@ verify.directive('identityValidity', function() {
         var idCardMod = idCardWiSum % 11;
         var idCardLast = value[17];
         if (idCardMod == 2) {
-          if (idCardLast.toLowerCase().equals('x')) {
+          if (idCardLast.toLowerCase() === 'x') {
             ctrl.$setValidity('identityValidity', true);
           } else {
             ctrl.$setValidity('identityValidity', false);
