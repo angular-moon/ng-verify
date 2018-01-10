@@ -387,8 +387,9 @@ verify.directive('showOne', [
             //初始化为隐藏
             elem.css('display', 'none');
 
-            //计算插入位置,解决动态增加ng-messages的问题
-            var insertTo = 0;
+            //计算插入位置, 解决动态增加ng-messages的问题
+            //如果没找到对应的元素, 插入到末尾
+            var insertTo = null;
             var allElem = angular.element('[ng-messages]');
             for (var i = allElem.length - 1; i >= 0; --i) {
               if (elem.attr('ng-messages') == allElem.eq(i).attr('ng-messages')) {
@@ -397,7 +398,10 @@ verify.directive('showOne', [
               }
             }
             adjustPosition();
-            meaasges.splice(insertTo | 0, 0, elem);
+            if(typeof insertTo === 'number')
+               meaasges.splice(insertTo, 0, elem);
+            else
+              meaasges.push(elem);
           };
 
           this.delMessage = function(elem) {
