@@ -23,7 +23,7 @@ verify.run([
     $rootScope._PATTERN_.url = /^https?:\/\/[^\s]*$/; //url
     $rootScope._PATTERN_.chinese = /^[\u4E00-\u9FA5\uF900-\uFA2D]+$/; //仅中文
     $rootScope._PATTERN_.ascii = /^[\x00-\xFF]+$/; //仅ACSII字符
-    $rootScope._PATTERN_.zipcode = /^[1-9]\d{5}(?!\d)$/; //邮编
+    $rootScope._PATTERN_.zipcode = /^[0-9]\d{5}(?!\d)$/; //邮编
     $rootScope._PATTERN_.ip4 = /^(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)$/; //ip地址
     $rootScope._PATTERN_.notempty = /^\S+$/; //非空
     $rootScope._PATTERN_.picture = /(.*)\.(jpg|bmp|gif|ico|pcx|jpeg|tif|png|raw|tga)$/; //图片
@@ -213,51 +213,108 @@ verify.directive('minTime', function() {
   };
 });
 
+
+// 是否组织机构代码
+function isOrgCode(value) {
+  var ws = [3, 7, 9, 10, 5, 8, 4, 2];
+  var str = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var orgCodereg = /^([0-9A-Z]){8}-[0-9|X]$/;
+  if (!value || value.length !== 10 || !orgCodereg.test(value)) {
+    return false;
+  }
+  var sum = 0;
+  for (var i = 0; i < 8; i++) {
+    sum += str.indexOf(value.charAt(i)) * ws[i];
+  }
+  var c9 = 11 - sum % 11;
+  c9 = c9 == 10 ? 'X' : c9;
+  c9 = c9 == 11 ? '0' : c9;
+  return c9 == value.charAt(9);
+}
+
+// 是否统一社会信用代码
+function isSocialCreditCode(value) {
+  if (!value || value.length !== 18) {
+    return false;
+  }
+
+  var Ancode; //统一社会信用代码的每一个值
+  var Ancodevalue; //统一社会信用代码每一个值的权重
+  var total = 0;
+  var weightedfactors = [1, 3, 9, 27, 19, 26, 16, 17, 20, 29, 25, 13, 8, 24, 10, 30, 28]; //加权因子
+  var str = '0123456789ABCDEFGHJKLMNPQRTUWXY';
+  //不用I、O、S、V、Z
+  for (var i = 0; i < value.length - 1; i++) {
+    Ancode = value.substring(i, i + 1);
+    Ancodevalue = str.indexOf(Ancode);
+    total = total + Ancodevalue * weightedfactors[i];
+    //权重与加权因子相乘之和
+  }
+  var logiccheckcode = 31 - total % 31;
+  if (logiccheckcode === 31) {
+    logiccheckcode = 0;
+  }
+  var Str = '0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,J,K,L,M,N,P,Q,R,T,U,W,X,Y';
+  var Array_Str = Str.split(',');
+  logiccheckcode = Array_Str[logiccheckcode];
+  var checkcode = value.substring(17, 18);
+  return logiccheckcode == checkcode;
+}
+
 /**
- * 组织机构代码验证
+ * 统一社会信用代码(SocialCreditCode)
  */
-verify.directive('orgCodeValidity', function() {
+verify.directive('sccValidity', function() {
   return {
     restrict: 'A',
     require: '?ngModel',
     link: function(scope, elem, attr, ctrl) {
       if (!ctrl) return;
 
-      scope.$watch(attr.orgCodeValidity, function(newValue, oldValue) {
+      scope.$watch(attr.sccValidity, function(newValue, oldValue) {
         if (newValue !== oldValue) ctrl.$setViewValue(ctrl.$viewValue);
       });
 
-      var orgCodeValidator = function(value) {
+      var sccValidity = function(value) {
         if (!value) {
-          ctrl.$setValidity('orgCodeValidity', true);
-          return value;
+          ctrl.$setValidity('sccValidity', true);
+          return;
         }
-
-        var ws = [3, 7, 9, 10, 5, 8, 4, 2];
-        var str = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        var orgCodereg = /^([0-9A-Z]){8}-[0-9|X]$/;
-        if (!orgCodereg.test(value)) {
-          ctrl.$setValidity('orgCodeValidity', false);
-          return value;
-        }
-        var sum = 0;
-        for (var i = 0; i < 8; i++) {
-          sum += str.indexOf(value.charAt(i)) * ws[i];
-        }
-        var c9 = 11 - sum % 11;
-        c9 = c9 == 10 ? 'X' : c9;
-        c9 = c9 == 11 ? '0' : c9;
-        if (c9 != value.charAt(9)) {
-          ctrl.$setValidity('orgCodeValidity', false);
-        } else {
-          ctrl.$setValidity('orgCodeValidity', true);
-        }
-
+        ctrl.$setValidity('sccValidity', isSocialCreditCode(value));
         return value;
       };
 
-      ctrl.$formatters.push(orgCodeValidator);
-      ctrl.$parsers.unshift(orgCodeValidator);
+      ctrl.$formatters.push(sccValidity);
+      ctrl.$parsers.unshift(sccValidity);
+    }
+  };
+});
+
+/**
+ * 统一社会信用代码(SocialCreditCode) 或 组织机构代码(orgCode) 效验
+ */
+verify.directive('sccOrOcValidity', function() {
+  return {
+    restrict: 'A',
+    require: '?ngModel',
+    link: function(scope, elem, attr, ctrl) {
+      if (!ctrl) return;
+
+      scope.$watch(attr.sccOrOcValidity, function(newValue, oldValue) {
+        if (newValue !== oldValue) ctrl.$setViewValue(ctrl.$viewValue);
+      });
+
+      var sccOrOcValidity = function(value) {
+        if (!value) {
+          ctrl.$setValidity('sccOrOcValidity', true);
+          return;
+        }
+        ctrl.$setValidity('sccOrOcValidity', isSocialCreditCode(value) || isOrgCode(value));
+        return value;
+      };
+
+      ctrl.$formatters.push(sccOrOcValidity);
+      ctrl.$parsers.unshift(sccOrOcValidity);
     }
   };
 });
