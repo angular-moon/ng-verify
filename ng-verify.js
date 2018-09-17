@@ -35,8 +35,9 @@ verify.run([
     $rootScope._PATTERN_.letter = /^[A-Za-z]+$/; //字母
     $rootScope._PATTERN_.letter_u = /^[A-Z]+$/; //大写字母
     $rootScope._PATTERN_.letter_l = /^[a-z]+$/; //小写字母
+    $rootScope._PATTERN_.mobile = /^1[3-9]\d{9}$/; //手机号码
     $rootScope._PATTERN_.idcard = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/; //身份证
-  }
+  },
 ]);
 
 verify.directive('equals', function() {
@@ -64,7 +65,7 @@ verify.directive('equals', function() {
 
       ctrl.$formatters.push(equalsValidator);
       ctrl.$parsers.unshift(equalsValidator);
-    }
+    },
   };
 });
 
@@ -95,7 +96,7 @@ verify.directive('ngMin', function() {
 
       ctrl.$formatters.push(minValidator);
       ctrl.$parsers.unshift(minValidator);
-    }
+    },
   };
 });
 
@@ -129,7 +130,7 @@ verify.directive('ngMax', function() {
 
       ctrl.$formatters.push(maxValidator);
       ctrl.$parsers.unshift(maxValidator);
-    }
+    },
   };
 });
 
@@ -169,7 +170,7 @@ verify.directive('maxTime', function() {
 
       ctrl.$formatters.push(maxTimeValidator);
       ctrl.$parsers.unshift(maxTimeValidator);
-    }
+    },
   };
 });
 
@@ -209,10 +210,102 @@ verify.directive('minTime', function() {
 
       ctrl.$formatters.push(minTimeValidator);
       ctrl.$parsers.unshift(minTimeValidator);
-    }
+    },
   };
 });
 
+/**
+ * 身份证件号码验证
+ */
+verify.directive('identityValidity', function() {
+  return {
+    restrict: 'A',
+    require: '?ngModel',
+    link: function(scope, elem, attr, ctrl) {
+      if (!ctrl) return;
+
+      scope.$watch(attr.identityValidity, function(newValue, oldValue) {
+        if (newValue !== oldValue) ctrl.$setViewValue(ctrl.$viewValue);
+      });
+
+      // 中国大陆身份证号码 18位
+      function china(value) {
+        var idCardWi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
+        var idCardY = [1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+
+        var identityReg = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/;
+        if (!identityReg.test(value)) {
+          ctrl.$setValidity('identityValidity', false);
+          return value;
+        }
+
+        var idCardWiSum = 0;
+        for (var i = 0; i < 17; i++) {
+          idCardWiSum += value[i] * idCardWi[i];
+        }
+        var idCardMod = idCardWiSum % 11;
+        var idCardLast = value[17];
+        if (idCardMod == 2) {
+          if (idCardLast.toLowerCase() === 'x') {
+            ctrl.$setValidity('identityValidity', true);
+          } else {
+            ctrl.$setValidity('identityValidity', false);
+          }
+        } else {
+          if (idCardLast * 1 === idCardY[idCardMod]) {
+            ctrl.$setValidity('identityValidity', true);
+          } else {
+            ctrl.$setValidity('identityValidity', false);
+          }
+        }
+
+        return value;
+      }
+
+      var regs = [];
+      // 香港
+      regs.push(/^[a-zA-Z]{1,2}[0-9]{6}\(?[0-9a-zA-Z]\)?$/);
+      // 澳门
+      regs.push(/^[157][0-9]{6}\(?[0-9Aa]\)?$/);
+      // 台湾
+      regs.push(/^[A-Z][0-9]{9}$/);
+      // 护照
+      regs.push(
+        /^1[45][0-9]{7}|([P|p|S|s]\d{7})|([S|s|G|g]\d{8})|([Gg|Tt|Ss|Ll|Qq|Dd|Aa|Ff]\d{8})|([H|h|M|m]\d{8，10})$/
+      );
+      //军官证
+      regs.push(/[\u4e00-\u9fa5](字第){1}(\d{4,8})(号?)$/);
+      // 除身份证以外的其他身份证件号码验证
+      function other(value) {
+        for (var i = 0; i < regs.length; i++) {
+          if (regs[i].test(value)) {
+            ctrl.$setValidity('identityValidity', true);
+            return value;
+          }
+        }
+
+        ctrl.$setValidity('identityValidity', false);
+        return value;
+      }
+
+      var identityValidator = function(value) {
+        if (!value) {
+          ctrl.$setValidity('identityValidity', true);
+          return value;
+        }
+
+        if (value.length === 18) {
+          return china(value);
+        } else {
+          return other(value);
+        }
+      };
+
+      ctrl.$formatters.push(identityValidator);
+      ctrl.$parsers.unshift(identityValidator);
+    },
+  };
+});
 
 // 是否组织机构代码
 function isOrgCode(value) {
@@ -226,7 +319,7 @@ function isOrgCode(value) {
   for (var i = 0; i < 8; i++) {
     sum += str.indexOf(value.charAt(i)) * ws[i];
   }
-  var c9 = 11 - sum % 11;
+  var c9 = 11 - (sum % 11);
   c9 = c9 == 10 ? 'X' : c9;
   c9 = c9 == 11 ? '0' : c9;
   return c9 == value.charAt(9);
@@ -250,7 +343,7 @@ function isSocialCreditCode(value) {
     total = total + Ancodevalue * weightedfactors[i];
     //权重与加权因子相乘之和
   }
-  var logiccheckcode = 31 - total % 31;
+  var logiccheckcode = 31 - (total % 31);
   if (logiccheckcode === 31) {
     logiccheckcode = 0;
   }
@@ -286,7 +379,7 @@ verify.directive('sccValidity', function() {
 
       ctrl.$formatters.push(sccValidity);
       ctrl.$parsers.unshift(sccValidity);
-    }
+    },
   };
 });
 
@@ -315,65 +408,7 @@ verify.directive('sccOrOcValidity', function() {
 
       ctrl.$formatters.push(sccOrOcValidity);
       ctrl.$parsers.unshift(sccOrOcValidity);
-    }
-  };
-});
-
-/**
- * 身份证验证
- */
-verify.directive('identityValidity', function() {
-  return {
-    restrict: 'A',
-    require: '?ngModel',
-    link: function(scope, elem, attr, ctrl) {
-      if (!ctrl) return;
-
-      scope.$watch(attr.identityValidity, function(newValue, oldValue) {
-        if (newValue !== oldValue) ctrl.$setViewValue(ctrl.$viewValue);
-      });
-
-      var identityValidator = function(value) {
-        if (!value) {
-          ctrl.$setValidity('identityValidity', true);
-          return value;
-        }
-
-        var idCardWi = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-        var idCardY = [1, 0, 10, 9, 8, 7, 6, 5, 4, 3, 2];
-
-        var identityReg = /^(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$)|(^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])((\d{4})|\d{3}[Xx])$)$/;
-        if (!identityReg.test(value)) {
-          ctrl.$setValidity('identityValidity', false);
-          return value;
-        }
-
-        var idCardWiSum = 0;
-        for (var i = 0; i < 17; i++) {
-          idCardWiSum += value[i] * idCardWi[i];
-        }
-        var idCardMod = idCardWiSum % 11;
-        var idCardLast = value[17];
-        if (idCardMod == 2) {
-          if (idCardLast.toLowerCase() === 'x') {
-            ctrl.$setValidity('identityValidity', true);
-          } else {
-            ctrl.$setValidity('identityValidity', false);
-          }
-        } else {
-          if (idCardLast * 1 === idCardY[idCardMod]) {
-            ctrl.$setValidity('identityValidity', true);
-          } else {
-            ctrl.$setValidity('identityValidity', false);
-          }
-        }
-
-        return value;
-      };
-
-      ctrl.$formatters.push(identityValidator);
-      ctrl.$parsers.unshift(identityValidator);
-    }
+    },
   };
 });
 
@@ -388,7 +423,7 @@ verify.directive('dyName', function() {
     link: function(scope, elm, iAttrs, ngModelCtr) {
       ngModelCtr.$name = scope.$eval(iAttrs.dyName);
       var formController = elm.controller('form') || {
-        $addControl: angular.noop
+        $addControl: angular.noop,
       };
       formController.$addControl(ngModelCtr);
       //fix noVerify bug
@@ -399,7 +434,7 @@ verify.directive('dyName', function() {
       scope.$on('$destroy', function() {
         formController.$removeControl(ngModelCtr);
       });
-    }
+    },
   };
 });
 
@@ -429,7 +464,7 @@ verify.directive('showOne', [
             $timeout.cancel(adjust);
             adjust = $timeout(function() {
               try {
-                $rootScope.$broadcast('verfiyAdjust');
+                $rootScope.$broadcast('verifyAdjust');
               } catch (e) {
                 try {
                   $(window.top).resize();
@@ -455,10 +490,8 @@ verify.directive('showOne', [
               }
             }
             adjustPosition();
-            if(typeof insertTo === 'number')
-               meaasges.splice(insertTo, 0, elem);
-            else
-              meaasges.push(elem);
+            if (typeof insertTo === 'number') meaasges.splice(insertTo, 0, elem);
+            else meaasges.push(elem);
           };
 
           this.delMessage = function(elem) {
@@ -499,10 +532,10 @@ verify.directive('showOne', [
               show(showIndex);
             }
           };
-        }
-      ]
+        },
+      ],
     };
-  }
+  },
 ]);
 
 //自动计算ngMessages 的 position
@@ -534,20 +567,20 @@ verify.directive('ngMessages', [
               elem.css({
                 left: input.position().left - 39 + offset.left + 'px',
                 top: input.position().top + input.outerHeight() + 10 + offset.top + 'px',
-                width: width
+                width: width,
               });
             } else {
               if (position == 'right') {
                 elem.css({
                   left: input.position().left + input.outerWidth() + 10 + offset.left + 'px',
                   top: input.position().top + offset.top + 'px',
-                  width: width
+                  width: width,
                 });
               } else {
                 elem.css({
                   left: input.position().left + offset.left + 'px',
                   top: input.position().top + input.outerHeight() + 5 + offset.top + 'px',
-                  width: width
+                  width: width,
                 });
               }
             }
@@ -558,7 +591,7 @@ verify.directive('ngMessages', [
           adjust();
         });
 
-       function bindResize() {
+        function bindResize() {
           try {
             $($window.top).on('resize', adjust);
           } catch (e) {
@@ -602,9 +635,9 @@ verify.directive('ngMessages', [
             showOne.delMessage(elem);
           });
         }
-      }
+      },
     };
-  }
+  },
 ]);
 
 verify.directive('noVerify', function() {
@@ -637,30 +670,34 @@ verify.directive('noVerify', function() {
 
       ngModel.$formatters.unshift(noVerify);
       ngModel.$parsers.push(noVerify);
-    }
+    },
   };
 });
 
 $(function() {
-  if (top.$.blockUI) {
-    top.$.blockUI.defaults.onBlock = function() {
-      try {
-        angular
-          .element('.blockMsg')
-          .injector()
-          .invoke([
-            '$rootScope',
-            function($rootScope) {
-              $rootScope.$broadcast('verfiyAdjust');
-            }
-          ]);
-      } catch (e) {
+  try {
+    if (top.$.blockUI) {
+      top.$.blockUI.defaults.onBlock = function() {
         try {
-          $(window.top).resize();
+          angular
+            .element('.blockMsg')
+            .injector()
+            .invoke([
+              '$rootScope',
+              function($rootScope) {
+                $rootScope.$broadcast('verifyAdjust');
+              },
+            ]);
         } catch (e) {
-          $(window).resize();
+          try {
+            $(window.top).resize();
+          } catch (e) {
+            $(window).resize();
+          }
         }
-      }
-    };
+      };
+    }
+  } catch (e) {
+    console.log('ng-verify can not access top window');
   }
 });
