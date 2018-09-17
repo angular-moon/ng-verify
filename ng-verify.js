@@ -583,6 +583,12 @@ verify.directive('ngMessages', [
             adjust();
           });
         });
+        // 上面的注册时间name拼写错误, 为了向下兼容任然保留
+        scope.$on('verifyAdjust', function() {
+          $timeout(function() {
+            adjust();
+          });
+        });
 
         if (showOne) {
           showOne.addMessage(elem);
