@@ -558,15 +558,25 @@ verify.directive('ngMessages', [
           adjust();
         });
 
-        try {
-          $($window.top).resize(function() {
-            adjust();
-          });
-        } catch (e) {
-          $($window).resize(function() {
-            adjust();
-          });
+       function bindResize() {
+          try {
+            $($window.top).on('resize', adjust);
+          } catch (e) {
+            $($window).on('resize', adjust);
+          }
         }
+        bindResize();
+
+        function unbindResize() {
+          try {
+            $($window.top).off('resize', adjust);
+          } catch (e) {
+            $($window).off('resize', adjust);
+          }
+        }
+
+        window.addEventListener('unload', unbindResize);
+        elem.bind('$destroy', unbindResize);
 
         scope.$on('verfiyAdjust', function() {
           $timeout(function() {
