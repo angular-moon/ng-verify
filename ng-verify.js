@@ -269,12 +269,6 @@ verify.directive('identityValidity', function() {
       regs.push(/^[157][0-9]{6}\(?[0-9Aa]\)?$/);
       // 台湾
       regs.push(/^[A-Z][0-9]{9}$/);
-      // 护照
-      regs.push(
-        /^1[45][0-9]{7}|([P|p|S|s]\d{7})|([S|s|G|g]\d{8})|([Gg|Tt|Ss|Ll|Qq|Dd|Aa|Ff]\d{8})|([H|h|M|m]\d{8，10})$/
-      );
-      //军官证
-      regs.push(/[\u4e00-\u9fa5](字第){1}(\d{4,8})(号?)$/);
       // 除身份证以外的其他身份证件号码验证
       function other(value) {
         for (var i = 0; i < regs.length; i++) {
